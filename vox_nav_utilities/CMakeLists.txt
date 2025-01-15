@@ -68,7 +68,7 @@ ament_target_dependencies(tf_helpers ${dependencies})
 
 add_library(planner_helpers SHARED src/planner_helpers.cpp)
 ament_target_dependencies(planner_helpers ${dependencies})
-target_link_libraries(planner_helpers ${LIBFCL_LIBRARIES} tf_helpers ompl)
+target_link_libraries(planner_helpers ${LIBFCL_LIBRARIES} tf_helpers ${OMPL_LIBRARIES})
 
 add_library(map_manager_helpers SHARED src/map_manager_helpers.cpp)
 ament_target_dependencies(map_manager_helpers ${dependencies})
@@ -90,7 +90,7 @@ ament_target_dependencies(pcl2octomap_converter_node ${dependencies})
 
 add_executable(planner_benchmarking_node src/planner_benchmarking_node.cpp)
 ament_target_dependencies(planner_benchmarking_node ${dependencies})
-target_link_libraries(planner_benchmarking_node ${LIBFCL_LIBRARIES} tf_helpers elevation_state_space planner_helpers ompl)
+target_link_libraries(planner_benchmarking_node ${LIBFCL_LIBRARIES} tf_helpers elevation_state_space planner_helpers ${OMPL_LIBRARIES})
 
 install(TARGETS tf_helpers 
                 planner_helpers 

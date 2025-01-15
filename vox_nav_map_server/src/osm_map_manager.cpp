@@ -134,7 +134,7 @@ namespace vox_nav_map_server
     RCLCPP_INFO(
       this->get_logger(),
       "Road topology points are wrong in elevation, so we will fix them with road colliders");
-    boost::progress_display show_progress(osm_road_topologies_pointcloud_->points.size());
+    boost::timer::progress_display show_progress(osm_road_topologies_pointcloud_->points.size());
     pcl::KdTreeFLANN<pcl::PointXYZRGB> kdtree;
     kdtree.setInputCloud(osm_road_colliders_pointcloud_);
 

@@ -84,44 +84,44 @@ ament_target_dependencies(vox_nav_ompl_planners ${dependencies})
 # PLANNER SERVER ##############################################
 add_executable(planner_server src/planner_server.cpp)
 ament_target_dependencies(planner_server ${dependencies})
-target_link_libraries(planner_server ${OCTOMAP_LIBRARIES} ${LIBFCL_LIBRARIES} ompl)
+target_link_libraries(planner_server ${OCTOMAP_LIBRARIES} ${LIBFCL_LIBRARIES} ${OMPL_LIBRARIES})
 
 # SE2 PLANNE R##################################################
 set(se2_planner vox_nav_se2_planner)
 add_library(se2_planner SHARED src/plugins/se2_planner.cpp)
 ament_target_dependencies(se2_planner ${dependencies})
-target_link_libraries(se2_planner ${OCTOMAP_LIBRARIES} ${LIBFCL_LIBRARIES} ompl)
+target_link_libraries(se2_planner ${OCTOMAP_LIBRARIES} ${LIBFCL_LIBRARIES} ${OMPL_LIBRARIES})
 
 # SE3 PLANNE R##################################################
 set(se3_planner vox_nav_se3_planner)
 add_library(se3_planner SHARED src/plugins/se3_planner.cpp)
 ament_target_dependencies(se3_planner ${dependencies})
-target_link_libraries(se3_planner ${OCTOMAP_LIBRARIES} ${LIBFCL_LIBRARIES} ompl)
+target_link_libraries(se3_planner ${OCTOMAP_LIBRARIES} ${LIBFCL_LIBRARIES} ${OMPL_LIBRARIES})
 
 # ELEVATION PLANNER ############################################
 add_library(elevation_planner SHARED src/plugins/elevation_planner.cpp)
 ament_target_dependencies(elevation_planner ${dependencies})
-target_link_libraries(elevation_planner ${OCTOMAP_LIBRARIES} ${LIBFCL_LIBRARIES} ompl)
+target_link_libraries(elevation_planner ${OCTOMAP_LIBRARIES} ${LIBFCL_LIBRARIES} ${OMPL_LIBRARIES})
 
 # ELEVATION CONTROL PLANNER ############################################
 add_library(elevation_control_planner SHARED src/plugins/elevation_control_planner.cpp)
 ament_target_dependencies(elevation_control_planner ${dependencies})
-target_link_libraries(elevation_control_planner ${OCTOMAP_LIBRARIES} ${LIBFCL_LIBRARIES} ompl vox_nav_ompl_planners)
+target_link_libraries(elevation_control_planner ${OCTOMAP_LIBRARIES} ${LIBFCL_LIBRARIES} ${OMPL_LIBRARIES} vox_nav_ompl_planners)
 
 # OPTIMAL ELEVATION PLANNER ####################################
 add_library(optimal_elevation_planner SHARED src/plugins/optimal_elevation_planner.cpp)
 ament_target_dependencies(optimal_elevation_planner ${dependencies})
-target_link_libraries(optimal_elevation_planner ${OCTOMAP_LIBRARIES} ${LIBFCL_LIBRARIES} ompl)
+target_link_libraries(optimal_elevation_planner ${OCTOMAP_LIBRARIES} ${LIBFCL_LIBRARIES} ${OMPL_LIBRARIES})
 
 # OSM ELEVATION PLANNER ####################################
 add_library(osm_elevation_planner SHARED src/plugins/osm_elevation_planner.cpp)
 ament_target_dependencies(osm_elevation_planner ${dependencies})
-target_link_libraries(osm_elevation_planner ${OCTOMAP_LIBRARIES} ${LIBFCL_LIBRARIES} ompl vox_nav_ompl_planners)
+target_link_libraries(osm_elevation_planner ${OCTOMAP_LIBRARIES} ${LIBFCL_LIBRARIES} ${OMPL_LIBRARIES} vox_nav_ompl_planners)
 
 # POLYTUNNEL PLANNER ####################################
 add_library(polytunnel_planner SHARED src/plugins/polytunnel_planner.cpp)
 ament_target_dependencies(polytunnel_planner ${dependencies})
-target_link_libraries(polytunnel_planner ${OCTOMAP_LIBRARIES} ${LIBFCL_LIBRARIES} ${PCL_LIBRARIES} ompl)
+target_link_libraries(polytunnel_planner ${OCTOMAP_LIBRARIES} ${LIBFCL_LIBRARIES} ${PCL_LIBRARIES} ${OMPL_LIBRARIES})
 
 # ELEVATION CONTROL PLANNERS BENCHMARKS ####################################
 # BREAKING CI
@@ -132,7 +132,7 @@ target_link_libraries(polytunnel_planner ${OCTOMAP_LIBRARIES} ${LIBFCL_LIBRARIES
 # QUADROTOR CONTROL PLANNERS BENCHMARKS ####################################
 add_executable(quadrotor_control_planners_benchmark src/tools/quadrotor_control_planners_benchmark.cpp)
 ament_target_dependencies(quadrotor_control_planners_benchmark ${dependencies})
-target_link_libraries(quadrotor_control_planners_benchmark ${OCTOMAP_LIBRARIES} ${LIBFCL_LIBRARIES} vox_nav_ompl_planners ompl)
+target_link_libraries(quadrotor_control_planners_benchmark ${OCTOMAP_LIBRARIES} ${LIBFCL_LIBRARIES} vox_nav_ompl_planners ${OMPL_LIBRARIES})
 
 install(TARGETS optimal_elevation_planner
   osm_elevation_planner

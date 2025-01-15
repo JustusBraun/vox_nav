@@ -36,7 +36,7 @@
 #include "rclcpp/rclcpp.hpp"
 #include "visualization_msgs/msg/marker_array.hpp"
 #include "vox_nav_utilities/pcl_helpers.hpp"
-#include <tf2_eigen/tf2_eigen.h>
+#include <tf2_eigen/tf2_eigen.hpp>
 
 
 namespace vox_nav_utilities

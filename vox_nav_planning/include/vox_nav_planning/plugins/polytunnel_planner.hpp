@@ -20,7 +20,7 @@
 #include "sensor_msgs/msg/point_cloud2.hpp"
 #include "vox_nav_utilities/elevation_state_space.hpp"
 #include "vox_nav_utilities/pcl_helpers.hpp"
-#include "tf2_geometry_msgs/tf2_geometry_msgs.h"
+#include "tf2_geometry_msgs/tf2_geometry_msgs.hpp"
 #include "tf2_ros/transform_listener.h"
 #include "tf2/transform_datatypes.h"
 #include "tf2_ros/create_timer_interface.h"

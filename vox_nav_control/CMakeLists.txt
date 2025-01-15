@@ -68,7 +68,7 @@ set(dependencies
 add_executable(vox_nav_controller_server src/controller_server.cpp)
 target_include_directories(vox_nav_controller_server PUBLIC include ${OMPL_INCLUDE_DIRS})
 ament_target_dependencies(vox_nav_controller_server ${dependencies})
-target_link_libraries(vox_nav_controller_server ompl mosquittopp mosquitto)
+target_link_libraries(vox_nav_controller_server ${OMPL_LIBRARIES} mosquittopp mosquitto)
 
 add_executable(mpc_controller_acado_code_gen src/mpc_controller_acado/mpc_controller_acado_code_gen.cpp)
 target_include_directories(mpc_controller_acado_code_gen PUBLIC include 
@@ -85,18 +85,18 @@ add_library(mpc_controller_casadi SHARED               src/mpc_controller_casadi
                                                        src/mpc_controller_casadi/mpc_controller_casadi_ros.cpp)
 target_include_directories(mpc_controller_casadi PUBLIC include ${casadi_INCLUDE_DIR} ${OMPL_INCLUDE_DIRS})
 ament_target_dependencies(mpc_controller_casadi ${dependencies})
-target_link_libraries(mpc_controller_casadi ompl casadi)
+target_link_libraries(mpc_controller_casadi ${OMPL_LIBRARIES} casadi)
 
 add_library(lyapunov_controller SHARED                 src/lyapunov_controller/lyapunov_controller_ros.cpp)
 target_include_directories(lyapunov_controller PUBLIC include ${OMPL_INCLUDE_DIRS})
 ament_target_dependencies(lyapunov_controller ${dependencies})
-target_link_libraries(lyapunov_controller ompl)
+target_link_libraries(lyapunov_controller ${OMPL_LIBRARIES})
 
 # Path Refiner plugins
 add_library(traversability_based_plan_refiner SHARED src/plan_refiner_plugins/traversability_based_plan_refiner.cpp)
 target_include_directories(traversability_based_plan_refiner PUBLIC include ${OMPL_INCLUDE_DIRS})
 ament_target_dependencies(traversability_based_plan_refiner ${dependencies})
-target_link_libraries(traversability_based_plan_refiner ompl ${PCL_LIBRARIES} ${LIBFCL_LIBRARIES})
+target_link_libraries(traversability_based_plan_refiner ${OMPL_LIBRARIES} ${PCL_LIBRARIES} ${LIBFCL_LIBRARIES})
 
 option(ACADO_CODE_IS_READY "Whether Acado code has been generated" ON)
 
@@ -128,7 +128,7 @@ if(ACADO_CODE_IS_READY)
                                                                 ${OMPL_INCLUDE_DIRS}
                                                                 )
   ament_target_dependencies(mpc_controller_acado ${dependencies})
-  target_link_libraries(mpc_controller_acado ompl ${ACADO_SHARED_LIBRARIES} mpc_solver_acado)
+  target_link_libraries(mpc_controller_acado ${OMPL_LIBRARIES} ${ACADO_SHARED_LIBRARIES} mpc_solver_acado)
 
   install(TARGETS mpc_controller_acado
                   mpc_solver_acado
