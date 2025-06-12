@@ -313,14 +313,14 @@ void TraversabilityBasedPlanRefiner::traversabilityMapCallback(const sensor_msgs
   try
   {
     map_to_traversability_map_transform =
-        tf_buffer_ptr_->lookupTransform("odom", traversability_map_->header.frame_id, rclcpp::Time(0));
+        tf_buffer_ptr_->lookupTransform("map", traversability_map_->header.frame_id, rclcpp::Time(0));
   }
   catch (tf2::TransformException& ex)
   {
     RCLCPP_ERROR(node_->get_logger(), "%s", ex.what());
     return;
   }
-  pcl_ros::transformPointCloud("odom", map_to_traversability_map_transform, *traversability_map_, *traversability_map_);
+  pcl_ros::transformPointCloud("map", map_to_traversability_map_transform, *traversability_map_, *traversability_map_);
 
   pcl::PointCloud<pcl::PointXYZRGBA>::Ptr cloud_xyzrgba(new pcl::PointCloud<pcl::PointXYZRGBA>);
   pcl::fromROSMsg(*traversability_map_, *cloud_xyzrgba);
@@ -346,7 +346,7 @@ void TraversabilityBasedPlanRefiner::traversabilityMapCallback(const sensor_msgs
   sensor_msgs::msg::PointCloud2 supervoxel_cloud_msg;
   pcl::toROSMsg(*supervoxel_cloud, supervoxel_cloud_msg);
   supervoxel_cloud_msg.header.stamp = msg->header.stamp;
-  supervoxel_cloud_msg.header.frame_id = "odom";
+  supervoxel_cloud_msg.header.frame_id = "map";
   supervoxel_clusters_publisher_->publish(supervoxel_cloud_msg);
 
   // Get the supervoxel adjacency
@@ -355,7 +355,7 @@ void TraversabilityBasedPlanRefiner::traversabilityMapCallback(const sensor_msgs
 
   // Publish the supervoxel adjacency graph
   std_msgs::msg::Header header;
-  header.frame_id = "odom";
+  header.frame_id = "map";
   header.stamp = msg->header.stamp;
   visualization_msgs::msg::MarkerArray marker_array;
   // Publish empty to reset previous

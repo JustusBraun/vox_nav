@@ -149,10 +149,14 @@ void ControllerServer::executePathRefinerThread()
   while (rclcpp::ok())
   {
     geometry_msgs::msg::PoseStamped curr_robot_pose;
-    vox_nav_utilities::getCurrentPose(curr_robot_pose, *tf_buffer_, "odom", "base_link", transform_timeout_);
-    if (global_path_->poses.empty())
+    vox_nav_utilities::getCurrentPose(curr_robot_pose, *tf_buffer_, "map", "base_link", transform_timeout_);
     {
-      continue;
+      std::lock_guard guard(global_path_mutex_);
+      if (global_path_->poses.empty())
+      {
+        std::this_thread::sleep_for(std::chrono::milliseconds(static_cast<int>(plan_refiner_duration_)));
+        continue;
+      }
     }
     // NRefine the plan to ensure that we can get to the goal
     if (plan_refiner_->refinePlan(curr_robot_pose, *global_path_))
@@ -268,15 +272,19 @@ void ControllerServer::followPath(const std::shared_ptr<GoalHandleFollowPath> go
     }
   }
   geometry_msgs::msg::PoseStamped initial_robot_pose;
-  vox_nav_utilities::getCurrentPose(initial_robot_pose, *tf_buffer_, "odom", "base_link", transform_timeout_);
-  global_path_ = std::make_shared<nav_msgs::msg::Path>();
-  global_path_->header = goal->path.header;
-  initial_robot_pose.pose.position.z = goal->path.poses.front().pose.position.z;
-  global_path_->poses.push_back(initial_robot_pose);
-
-  for (auto&& i : goal->path.poses)
+  vox_nav_utilities::getCurrentPose(initial_robot_pose, *tf_buffer_, "map", "base_link", transform_timeout_);
+  // Set the global path
   {
-    global_path_->poses.push_back(i);
+    std::lock_guard guard(global_path_mutex_);
+    global_path_ = std::make_shared<nav_msgs::msg::Path>();
+    global_path_->header = goal->path.header;
+    initial_robot_pose.pose.position.z = goal->path.poses.front().pose.position.z;
+    global_path_->poses.push_back(initial_robot_pose);
+
+    for (auto&& i : goal->path.poses)
+    {
+      global_path_->poses.push_back(i);
+    }
   }
 
   geometry_msgs::msg::Twist computed_velocity_commands;
@@ -293,8 +301,6 @@ void ControllerServer::followPath(const std::shared_ptr<GoalHandleFollowPath> go
 
   while (rclcpp::ok() && !is_goal_distance_tolerance_satisfied)
   {
-    std::lock_guard<std::mutex> guard(global_path_mutex_);
-
     auto& clock = *this->get_clock();
 
     auto loop_start_time = steady_clock_.now();
@@ -308,7 +314,7 @@ void ControllerServer::followPath(const std::shared_ptr<GoalHandleFollowPath> go
     }
 
     geometry_msgs::msg::PoseStamped curr_robot_pose;
-    vox_nav_utilities::getCurrentPose(curr_robot_pose, *tf_buffer_, "odom", "base_link", transform_timeout_);
+    vox_nav_utilities::getCurrentPose(curr_robot_pose, *tf_buffer_, "map", "base_link", transform_timeout_);
 
     int nearest_traj_pose_index = vox_nav_control::common::nearestStateIndex(*global_path_, curr_robot_pose);
     curr_robot_pose.pose.position.z = global_path_->poses[nearest_traj_pose_index].pose.position.z;
@@ -351,7 +357,7 @@ void ControllerServer::followPath(const std::shared_ptr<GoalHandleFollowPath> go
         cmd_vel_publisher_->publish(computed_velocity_commands);
         goal_handle->publish_feedback(feedback);
 
-        vox_nav_utilities::getCurrentPose(curr_robot_pose, *tf_buffer_, "odom", "base_link", transform_timeout_);
+        vox_nav_utilities::getCurrentPose(curr_robot_pose, *tf_buffer_, "map", "base_link", transform_timeout_);
 
         double nan, curr_robot_psi, goal_psi;
         vox_nav_utilities::getRPYfromMsgQuaternion(curr_robot_pose.pose.orientation, nan, nan, curr_robot_psi);
@@ -409,6 +415,8 @@ void ControllerServer::followPath(const std::shared_ptr<GoalHandleFollowPath> go
     goal_handle->succeed(result);
     cmd_vel_publisher_->publish(geometry_msgs::msg::Twist());
     RCLCPP_INFO(this->get_logger(), "Follow Path Succeeded!");
+    std::lock_guard guard(global_path_mutex_);
+    global_path_ = std::make_shared<nav_msgs::msg::Path>();
   }
 }
 
