@@ -182,7 +182,7 @@ namespace vox_nav_control
       const geometry_msgs::msg::PoseStamped & curr_robot_pose)
     {
       int closest_state_index = -1;
-      int closest_state_distance = 10000.0;
+      double closest_state_distance = 10000.0;
       for (int i = 0; i < reference_traj.poses.size(); i++) {
 
         double curr_distance =
@@ -242,13 +242,16 @@ namespace vox_nav_control
       double void_var, yaw;
 
       if (local_goal_state_index - nearsest_traj_state_index < mpc_parameters.N) {
-        // Feed Intermediate state , which is nearest state in ref traj
-        vox_nav_utilities::getRPYfromMsgQuaternion(
-          curr_robot_pose.pose.orientation, void_var, void_var, yaw);
-        closest_ref_traj_state[0] = curr_robot_pose.pose.position.x;
-        closest_ref_traj_state[1] = curr_robot_pose.pose.position.y;
-        closest_ref_traj_state[2] = yaw;
-        path.append(static_cast<ompl::base::State *>(closest_ref_traj_state.get()));
+        // Feed Intermediate states , which is nearest state in ref traj
+        for (size_t i = nearsest_traj_state_index; i < local_goal_state_index; i++)
+        {
+          vox_nav_utilities::getRPYfromMsgQuaternion(
+            reference_traj.poses[i].pose.orientation, void_var, void_var, yaw);
+          closest_ref_traj_state[0] = reference_traj.poses[i].pose.position.x;
+          closest_ref_traj_state[1] = reference_traj.poses[i].pose.position.y;
+          closest_ref_traj_state[2] = yaw;
+          path.append(static_cast<ompl::base::State *>(closest_ref_traj_state.get()));
+        }
       } else {
         // Feed Intermediate state , which is nearest state in ref traj
         vox_nav_utilities::getRPYfromMsgQuaternion(

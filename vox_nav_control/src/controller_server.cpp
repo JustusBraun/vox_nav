@@ -317,7 +317,8 @@ void ControllerServer::followPath(const std::shared_ptr<GoalHandleFollowPath> go
     vox_nav_utilities::getCurrentPose(curr_robot_pose, *tf_buffer_, "map", "base_link", transform_timeout_);
 
     int nearest_traj_pose_index = vox_nav_control::common::nearestStateIndex(*global_path_, curr_robot_pose);
-    curr_robot_pose.pose.position.z = global_path_->poses[nearest_traj_pose_index].pose.position.z;
+    // Not necessary if curr_robot_pose is in the same frame as the path ie. "map"
+    // curr_robot_pose.pose.position.z = global_path_->poses[nearest_traj_pose_index].pose.position.z;
 
     // MQTT Subscriber, used to determine PAUSE/RESUME behaviour
     if (curr_comand_ == 0)
