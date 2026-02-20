@@ -43,7 +43,6 @@ find_package(vox_nav_utilities REQUIRED)
 find_package(Eigen3 REQUIRED)
 find_package(tf2_eigen REQUIRED)
 find_package(casadi REQUIRED)
-find_package(ACADO REQUIRED)
 find_package(vision_msgs REQUIRED)
 
 set(dependencies
@@ -70,22 +69,11 @@ target_include_directories(vox_nav_controller_server PUBLIC include ${OMPL_INCLU
 ament_target_dependencies(vox_nav_controller_server ${dependencies})
 target_link_libraries(vox_nav_controller_server ${OMPL_LIBRARIES} mosquittopp mosquitto)
 
-add_executable(mpc_controller_acado_code_gen src/mpc_controller_acado/mpc_controller_acado_code_gen.cpp)
-target_include_directories(mpc_controller_acado_code_gen PUBLIC include 
-                                                                include/vox_nav_control/mpc_controller_acado/auto_gen
-                                                                ${ACADO_INCLUDE_DIRS} 
-                                                                ${ACADO_QPOASES_EMBEDDED_INC_DIRS}
-                                                                ${OMPL_INCLUDE_DIRS}
-                                                                ${THIS_PACKAGE_INCLUDE_DIRS}
-                                                                )
-ament_target_dependencies(mpc_controller_acado_code_gen ${dependencies})
-target_link_libraries(mpc_controller_acado_code_gen ${ACADO_SHARED_LIBRARIES})
-
 add_library(mpc_controller_casadi SHARED               src/mpc_controller_casadi/mpc_controller_casadi_core.cpp 
                                                        src/mpc_controller_casadi/mpc_controller_casadi_ros.cpp)
 target_include_directories(mpc_controller_casadi PUBLIC include ${casadi_INCLUDE_DIR} ${OMPL_INCLUDE_DIRS})
 ament_target_dependencies(mpc_controller_casadi ${dependencies})
-target_link_libraries(mpc_controller_casadi ${OMPL_LIBRARIES} casadi)
+target_link_libraries(mpc_controller_casadi ${OMPL_LIBRARIES} casadi::casadi)
 
 add_library(lyapunov_controller SHARED                 src/lyapunov_controller/lyapunov_controller_ros.cpp)
 target_include_directories(lyapunov_controller PUBLIC include ${OMPL_INCLUDE_DIRS})
@@ -98,49 +86,6 @@ target_include_directories(traversability_based_plan_refiner PUBLIC include ${OM
 ament_target_dependencies(traversability_based_plan_refiner ${dependencies})
 target_link_libraries(traversability_based_plan_refiner ${OMPL_LIBRARIES} ${PCL_LIBRARIES} ${LIBFCL_LIBRARIES})
 
-option(ACADO_CODE_IS_READY "Whether Acado code has been generated" ON)
-
-if(ACADO_CODE_IS_READY)
-
-  add_library(mpc_solver_acado SHARED   
-              ${ACADO_QPOASES_EMBEDDED_SOURCES}
-              include/vox_nav_control/mpc_controller_acado/auto_gen/acado_common.h
-              include/vox_nav_control/mpc_controller_acado/auto_gen/acado_solver.c
-              include/vox_nav_control/mpc_controller_acado/auto_gen/acado_integrator.c
-              include/vox_nav_control/mpc_controller_acado/auto_gen/acado_qpoases_interface.hpp
-              include/vox_nav_control/mpc_controller_acado/auto_gen/acado_qpoases_interface.cpp
-              include/vox_nav_control/mpc_controller_acado/auto_gen/acado_auxiliary_functions.h
-              include/vox_nav_control/mpc_controller_acado/auto_gen/acado_auxiliary_functions.c)
-  target_include_directories(mpc_solver_acado PUBLIC PUBLIC include 
-                                                                include/vox_nav_control/mpc_controller_acado/auto_gen
-                                                                ${ACADO_INCLUDE_DIRS} 
-                                                                ${ACADO_QPOASES_EMBEDDED_INC_DIRS}
-                                                                ${THIS_PACKAGE_INCLUDE_DIRS}
-                                                                ${OMPL_INCLUDE_DIRS}
-                                                                )
-              
-  add_library(mpc_controller_acado SHARED  src/mpc_controller_acado/mpc_controller_acado_ros.cpp)
-  target_include_directories(mpc_controller_acado PUBLIC PUBLIC include 
-                                                                include/vox_nav_control/mpc_controller_acado/auto_gen
-                                                                ${ACADO_INCLUDE_DIRS} 
-                                                                ${ACADO_QPOASES_EMBEDDED_INC_DIRS}
-                                                                ${THIS_PACKAGE_INCLUDE_DIRS}
-                                                                ${OMPL_INCLUDE_DIRS}
-                                                                )
-  ament_target_dependencies(mpc_controller_acado ${dependencies})
-  target_link_libraries(mpc_controller_acado ${OMPL_LIBRARIES} ${ACADO_SHARED_LIBRARIES} mpc_solver_acado)
-
-  install(TARGETS mpc_controller_acado
-                  mpc_solver_acado
-  ARCHIVE DESTINATION lib
-  LIBRARY DESTINATION lib
-  RUNTIME DESTINATION bin)
-
-  ament_export_libraries(mpc_controller_acado)
-  ament_export_libraries(mpc_solver_acado)
-
-endif(ACADO_CODE_IS_READY)
-
 install(TARGETS mpc_controller_casadi
                 lyapunov_controller
                 traversability_based_plan_refiner
@@ -149,7 +94,6 @@ install(TARGETS mpc_controller_casadi
   RUNTIME DESTINATION bin)
 
 install(TARGETS vox_nav_controller_server
-                mpc_controller_acado_code_gen
   RUNTIME DESTINATION lib/${PROJECT_NAME})
 
 install(DIRECTORY include/
